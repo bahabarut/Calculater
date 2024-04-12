@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<style>
+    .form-control[readonly] {
+        background-color: white;
+    }
+</style>
+<div class="text-center">
+    <h1 class="display-6">Hesap Makinesi</h1>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-3 col-sm-6 col-6">
+        <div class="card">
+            @*  <div class="card-header p-0">
+            <input class="form-control form-control-lg" readonly />
+            </div> *@
+            <div class="card-body p-2">
+
+                <input class="form-control" readonly id="valInp" value="0" style="text-align:right;" />
+                <hr class="my-1" />
+                <div class="row px-2">
+                    <div class="col-md-9 col-sm-9 col-9">
+                        <div class="row">
+                            <div class="col-md-8 col-sm-8 col-8 p-1">
+                                <button class="btn btn-sm btn-success w-100 btns ac">AC</button>
+                            </div>
+                            <div class="col-md-4 col-sm-4 col-4 p-1">
+                                <button class="btn btn-sm btn-secondary w-100 btns c">C</button>
+                            </div>
+                        </div>
+                        <div class="row" style="direction:rtl;">
+                            @for (int i = 9; i >= 1; i--)
+                            {
+                                <div class="col-md-4 col-sm-4 col-4 p-1">
+                                    <button class="btn btn-sm btn-secondary w-100 numbers btns">@i</button>
+                                </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-4 p-1">
+                                <button class="btn btn-sm btn-secondary w-100  numbers btns">0</button>
+                            </div>
+                            <div class="col-md-4 col-sm-4 col-4 p-1">
+                                <button class="btn btn-sm btn-secondary w-100 process btns">.</button>
+                            </div>
+                            <div class="col-md-4 col-sm-4 col-4 p-1">
+                                <button class="btn btn-sm btn-primary w-100 process btns">=</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-3">
+                        <div class="row gap-2 pt-1 pe-2">
+                            <button class="btn btn-sm btn-secondary w-100 process procType btns">/</button>
+                            <button class="btn btn-sm btn-secondary w-100 process procType btns">*</button>
+                            <button class="btn btn-sm btn-secondary w-100 process procType btns">-</button>
+                            <button class="btn btn-sm btn-secondary w-100 process procType btns" style="padding:22px 0 25px 0;">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        var operator = null;
+        var solvedResult = false;
+        var operators = {
+            "+": (num1, num2) => num1 + num2,
+            "-": (num1, num2) => num1 - num2,
+            "*": (num1, num2) => num1 * num2,
+            "/": (num1, num2) => num1 / num2,
+        }
+
+        $(".btns").on("click", function (e) {
+            if ($(this).is(".ac")) {
+                $("#valInp").val("0");
+                solvedResult = false;
+            }
+            if ($(this).is(".c")) {
+                var newVal = $("#valInp").val().slice(0, $("#valInp").val().length - 1);
+                $("#valInp").val(newVal);
+            }
+            if ($(this).is(".process") || $(this).is(".numbers")) {
+                if ($("#valInp").val() == 0) {
+                    $("#valInp").val("");
+                }
+                if ($(this).is(".procType")) {
+                    operator = $(this).text();
+                }
+                if ($(this).text() == "=" && ($("#valInp").val().includes("+") || $("#valInp").val().includes("-") || $("#valInp").val().includes("/") || $("#valInp").val().includes("*"))) {
+                    var number1 = parseFloat($("#valInp").val().split(operator)[0]);
+                    var number2 = parseFloat($("#valInp").val().split(operator)[1]);
+                    var res = operators[operator](number1, number2).toFixed(2);
+                    $("#valInp").val(res);
+
+                    var newData = { Number1: number1, Number2: number2, Result: res, ProcessType: operator };
+                    $.post("/Home/AddProcess", newData, function (data, status) {
+                    });
+                }
+                if ($(this).text() != "=") {
+                    $("#valInp").val($("#valInp").val() + $(this).text());
+
+                }
+            }
+        });
+
+    </script>
+}

@@ -1,0 +1,63 @@
+﻿@model List<Process>
+@{
+    ViewData["Title"] = "Old Process";
+}
+<div class="text-center">
+    <h1 class="display-6">Önceki İşlemler</h1>
+</div>
+<div class="row">
+    <div class="form-group d-flex align-items-baseline">
+        <label class="form-label">Tarih</label>
+        <input class="form-control form-control-sm mx-1" type="date" id="filterdate" />
+        <a class="btn btn-sm btn-danger" href="/Home/OldProcess">temizle</a>
+    </div>
+</div>
+<div class="row">
+    @if (Model.Count == 0)
+    {
+        <h1>Veri Yok</h1>
+    }
+    else
+    {
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>İşlem</th>
+                    <th>1.Sayı</th>
+                    <th>2.Sayı</th>
+                    <th>Sonuç</th>
+                    <th>Tarih</th>
+                </tr>
+            </thead>
+            <tbody id="tableData">
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var item = Model.ElementAt(i);
+                    var proc = (item.ProcessType == "+" ? "Toplama" : (item.ProcessType == "-" ? "Çıkarma" : (item.ProcessType == "*" ? "Çarpma" : "Bölme")));
+                    <tr>
+                        <td>@proc</td>
+                        <td>@item.Number1</td>
+                        <td>@item.Number2</td>
+                        <td>@item.Result</td>
+                        <td>@item.CreatedDate.ToShortDateString()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+@section Scripts {
+    <script>
+        $("#filterdate").change(function () {
+            $.get("/Home/OldProcess", { filterDate: $("#filterdate").val() }, function (data, status) {
+                var innerHtml = "";
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    var islem = item.processType == "+" ? "Toplama" : (item.processType == "-" ? "Çıkarma" : (item.processType == "*" ? "Çarpma" : "Bölme"));
+                    innerHtml += `<tr><td>${islem}</td><td>${item.number1}</td><td>${item.number2}</td><td>${item.result}</td><td>${item.createdDate}</td></tr>`;
+                }
+                $("#tableData").html(innerHtml);
+            });
+        })
+    </script>
+}
