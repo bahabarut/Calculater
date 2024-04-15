@@ -6,7 +6,7 @@ namespace HesapMakinesiMVC.Entities
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=(localdbname); Database=HesapMakinesi; Trusted_Connection=True;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("Server=.; Database=HesapMakinesi; Trusted_Connection=True;TrustServerCertificate=True;");
         }
         public DbSet<Process> Processes { get; set; }
 

@@ -1,4 +1,4 @@
-﻿@model List<Process>
+﻿@* @model List<Process> *@
 @{
     ViewData["Title"] = "Old Process";
 }
@@ -6,19 +6,38 @@
     <h1 class="display-6">Önceki İşlemler</h1>
 </div>
 <div class="row">
-    <div class="form-group d-flex align-items-baseline">
-        <label class="form-label">Tarih</label>
-        <input class="form-control form-control-sm mx-1" type="date" id="filterdate" />
+    <div class="col">
+        <label class="form-label">Başlangıç Tarihi</label>
+        <input class="form-control form-control-sm mx-1 filterField" type="date" id="startdate" value="@DateTime.Now.Date.ToString("yyyy-MM-dd")" />
+        @* <a class="btn btn-sm btn-danger" href="/Home/OldProcess">temizle</a> *@
+    </div>
+    <div class="col">
+        <label class="form-label">Bitiş Tarihi</label>
+        <input class="form-control form-control-sm mx-1 filterField" type="date" id="enddate" />
+    </div>
+    <div class="col">
+        <label class="form-label">İşlem</label>
+        <select class="form-select form-select-sm filterField" id="process">
+           <option value="">Hepsi</option>
+           <option value="+">Toplama</option>
+           <option value="-">Çıkarma</option>
+           <option value="*">Çarpma</option>
+           <option value="/">Bölme</option>
+        </select>
+    </div>
+</div>
+<div class="row mt-2">
+    <div class="col">
         <a class="btn btn-sm btn-danger" href="/Home/OldProcess">temizle</a>
     </div>
 </div>
 <div class="row">
-    @if (Model.Count == 0)
+@*     @if (Model.Count == 0)
     {
         <h1>Veri Yok</h1>
     }
     else
-    {
+    { *@
         <table class="table table-sm">
             <thead>
                 <tr>
@@ -30,7 +49,7 @@
                 </tr>
             </thead>
             <tbody id="tableData">
-                @for (int i = 0; i < Model.Count; i++)
+                @* @for (int i = 0; i < Model.Count; i++)
                 {
                     var item = Model.ElementAt(i);
                     var proc = (item.ProcessType == "+" ? "Toplama" : (item.ProcessType == "-" ? "Çıkarma" : (item.ProcessType == "*" ? "Çarpma" : "Bölme")));
@@ -41,15 +60,19 @@
                         <td>@item.Result</td>
                         <td>@item.CreatedDate.ToShortDateString()</td>
                     </tr>
-                }
+                } *@
             </tbody>
         </table>
-    }
+    @* } *@
 </div>
 @section Scripts {
     <script>
-        $("#filterdate").change(function () {
-            $.get("/Home/OldProcess", { filterDate: $("#filterdate").val() }, function (data, status) {
+        GetData();
+        $(".filterField").change(function () {
+            GetData();
+        })
+        function GetData() {
+            $.get("/Home/GetData", { start: $("#startdate").val(), end: $("#enddate").val(), process: $("#process").val() }, function (data, status) {
                 var innerHtml = "";
                 for (var i = 0; i < data.length; i++) {
                     var item = data[i];
@@ -58,6 +81,6 @@
                 }
                 $("#tableData").html(innerHtml);
             });
-        })
+        }
     </script>
 }

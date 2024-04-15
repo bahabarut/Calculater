@@ -21,16 +21,21 @@ namespace HesapMakinesiMVC.Controllers
         {
             return View();
         }
-        public IActionResult OldProcess(DateTime? filterDate)
+        public IActionResult OldProcess() => View();
+        public JsonResult GetData(DateTime? start, DateTime? end, string? process)
         {
-            if (filterDate == null)
-                return View(pm.GetList(null));
-            else
-                return Json(pm.GetList(x => x.CreatedDate == filterDate).Select(x => new { createdDate = x.CreatedDate.ToShortDateString(), number1 = x.Number1, number2 = x.Number2, processId = x.ProcessId, processType = x.ProcessType, result = x.Result }));
+            Expression<Func<Entities.Process, bool>> condition;
+            condition = (x =>
+                 (start != null ? x.CreatedDate >= start : true) &&
+                 (end != null ? x.CreatedDate <= end : true) &&
+                 (process != null ? x.ProcessType == process : true)
+            );
+            var data = pm.GetList(condition).Select(x => new { createdDate = x.CreatedDate.ToShortDateString(), number1 = x.Number1, number2 = x.Number2, processId = x.ProcessId, processType = x.ProcessType, result = x.Result });
+            return Json(data);
         }
         public IActionResult AddProcess(Entities.Process process)
         {
-            process.CreatedDate = DateTime.Now.Date.AddDays(2);
+            process.CreatedDate = DateTime.Now.Date;
             pm.Add(process);
             return Json(new { success = true, message = "Ýþlem Baþarýlý" });
         }
